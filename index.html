@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+	<head>
+	<title>paren-soup</title>
+	<link rel="stylesheet" type="text/css" href="paren-soup-dark.css">
+		<script type="text/javascript">
+		function changeCSS(cssFile, cssLinkIndex) {
+			var oldlink = document.getElementsByTagName("link").item(cssLinkIndex);
+			var newlink = document.createElement("link");
+			newlink.setAttribute("rel", "stylesheet");
+			newlink.setAttribute("type", "text/css");
+			newlink.setAttribute("href", cssFile);
+			document.getElementsByTagName("head").item(0).replaceChild(newlink, oldlink);
+		}
+    </script>
+	</head>
+	<body>
+	Try switching between the <a href="#" onclick="changeCSS('paren-soup-light.css', 0);">light theme</a> and the
+    <a href="#" onclick="changeCSS('paren-soup-dark.css', 0);">dark theme</a>.
+    <br/><br/>
+	<div class="paren-soup">
+		<div class="instarepl"></div>
+		<div class="numbers"></div>
+		<div class="content" contenteditable="true">
+(defn selection [input]
+  (let [swapItemsInArray (fn [v i j]
+                           (let [a (nth v i)
+                                 b (nth v j)]
+                             (assoc (assoc v i b) j a)))
+        findMinIndexFrom (fn [v from to]
+                           (loop [i from
+                                  min (nth v from)
+                                  minIndex from]
+                             (if (> i to)
+                               minIndex
+                               (let [n (nth v i)
+                                     nextIndex (inc i)]
+                                 (if (< n min)
+                                   (recur nextIndex n i)
+                                   (recur nextIndex min minIndex))))))
+        size (count input)
+        lastIndex (dec size)]
+    (loop [v (vec input)
+           i 0]
+      (if (= i lastIndex)
+        v
+        (recur
+            (swapItemsInArray v i (findMinIndexFrom v i lastIndex))
+            (inc i))))))</div>
+	</div>
+	<br/>
+	Below is a much larger document based on <a href="https://github.com/swannodette/lt-cljs-tutorial">lt-cljs-tutorial</a>.
+	<br/><br/>
+	<div class="paren-soup">
+		<div class="instarepl"></div>
+		<div class="numbers"></div>
+		<div class="content" contenteditable="true">
+(defn bubble [input]
+  (let [lookForBubbles (fn [collection]
+                         (let [size (count collection)]
+                           (loop [a collection
+                                  lastBubble nil
+                                  i 0
+                                  j 1]
+                             (if (= j size)
+                               [a lastBubble]
+                               (let [x (nth a i)
+                                     y (nth a j)]
+                                 (if (> x y)
+                                   (recur (assoc (assoc (vec a) i y) j x) x (inc i) (inc j))
+                                   (recur a lastBubble (inc i) (inc j))))))))]
+    (loop [unsorted input
+           sorted '()]
+      (let [[a lastBubble] (lookForBubbles unsorted)]
+          (if (nil? lastBubble)
+            (concat unsorted sorted)
+            (recur (drop-last a) (conj sorted (last a))))))))
+</div>
+	</div>
+	<script type="text/javascript" src="paren-soup.js"></script>
+	<script type="text/javascript">
+		paren_soup.core.init_all();
+	</script>
+	</body>
+</html>
